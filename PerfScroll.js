@@ -50,7 +50,7 @@
             return PerfScroll.getInstance(aOptions);
         }
 
-        instances[lastInstanceId++] = this;
+        instances[++lastInstanceId] = this;
         this.instanceId = lastInstanceId;
         this.frame = new Frame();
         this.rail = document.createElement('div');
@@ -79,7 +79,7 @@
     PerfScroll.getInstance = function(aInstance) {
         var instance = aInstance instanceof Node ? aInstance.getAttribute('data-perfscroll-id') : aInstance;
 
-        return instances[aInstance];
+        return instances[instance];
     };
 
     PerfScroll.prototype = {
