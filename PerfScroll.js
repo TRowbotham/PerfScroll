@@ -175,6 +175,7 @@
             this.container.removeEventListener('touchstart', this, false);
             this.container.removeEventListener(pointerEvents.pointerdown, this, false);
             this.container.removeAttribute('data-perfscroll-id');
+            removeClass(this.container, 'PerfScroll');
             this.frame.destroy();
             delete this.frame;
             delete instances[this.instanceId];
@@ -265,6 +266,16 @@
         return function() {
             return aFunction.call(aContext, aArg);
         };
+    }
+
+    function removeClass(aElement, aClass) {
+        var classes = (aElement.className || '').split(' '),
+        index = classes.indexOf(aClass);
+
+        if (index > -1) {
+            classes.splice(index, 1);
+            aElement.className = classes.join(' ');
+        }
     }
 
     function scrollTo(aElement, aX, aY) {
