@@ -175,6 +175,7 @@
             this.container.removeEventListener('touchstart', this, false);
             this.container.removeEventListener(pointerEvents.pointerdown, this, false);
             this.container.removeAttribute('data-perfscroll-id');
+            this.container.removeChild(this.rail);
             removeClass(this.container, 'PerfScroll');
             this.frame.destroy();
             delete this.frame;
