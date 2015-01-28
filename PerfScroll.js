@@ -13,6 +13,8 @@
         pointerup: ('PointerEvent' in window ? 'pointerup' : 'mspointerup')
     },
 
+    supportsClassList = 'classList' in document.documentElement,
+
     lastTime = 0,
 
     currTime,
@@ -270,22 +272,30 @@
     }
 
     function addClass(aElement, aClass) {
-        var classes = (aElement.className || '').split(' '),
-        index = classes.indexOf(aClass);
+        if (supportsClassList) {
+            aElement.classList.add(aClass);
+        } else {
+            var classes = (aElement.className || '').split(' '),
+                index = classes.indexOf(aClass);
 
-        if (index < 0) {
-            classes.push(aClass);
-            aElement.className = classes.join(' ');
+            if (index < 0) {
+                classes.push(aClass);
+                aElement.className = classes.join(' ');
+            }
         }
     }
 
     function removeClass(aElement, aClass) {
-        var classes = (aElement.className || '').split(' '),
-        index = classes.indexOf(aClass);
+        if (supportsClassList) {
+            aElement.classList.remove(aClass);
+        } else {
+            var classes = (aElement.className || '').split(' '),
+                index = classes.indexOf(aClass);
 
-        if (index > -1) {
-            classes.splice(index, 1);
-            aElement.className = classes.join(' ');
+            if (index > -1) {
+                classes.splice(index, 1);
+                aElement.className = classes.join(' ');
+            }
         }
     }
 
