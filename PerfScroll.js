@@ -56,9 +56,9 @@
         this.rail = document.createElement('div');
         this.railThumb = document.createElement('div');
         this.container = aOptions;
-        this.rail.className = 'PerfScroll-rail';
-        this.railThumb.className = 'PerfScroll-rail-thumb';
-        this.container.className += ' PerfScroll';
+        addClass(this.rail.className, 'PerfScroll-rail');
+        addClass(this.railThumb.className, 'PerfScroll-rail-thumb');
+        addClass(this.container.className, ' PerfScroll');
         this.container.setAttribute('data-perfscroll-id', lastInstanceId);
         this.rail.appendChild(this.railThumb);
         this.container.appendChild(this.rail);
@@ -267,6 +267,16 @@
         return function() {
             return aFunction.call(aContext, aArg);
         };
+    }
+
+    function addClass(aElement, aClass) {
+        var classes = (aElement.className || '').split(' '),
+        index = classes.indexOf(aClass);
+
+        if (index < 0) {
+            classes.push(aClass);
+            aElement.className = classes.join(' ');
+        }
     }
 
     function removeClass(aElement, aClass) {
