@@ -60,7 +60,7 @@
         this.container = aOptions;
         addClass(this.rail, 'PerfScroll-rail');
         addClass(this.railThumb, 'PerfScroll-rail-thumb');
-        addClass(this.container, ' PerfScroll');
+        addClass(this.container, 'PerfScroll');
         this.container.setAttribute('data-perfscroll-id', lastInstanceId);
         this.rail.appendChild(this.railThumb);
         this.container.appendChild(this.rail);
