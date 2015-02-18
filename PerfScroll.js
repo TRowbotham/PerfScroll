@@ -58,9 +58,9 @@
         this.rail = document.createElement('div');
         this.railThumb = document.createElement('div');
         this.container = aOptions;
-        addClass(this.rail.className, 'PerfScroll-rail');
-        addClass(this.railThumb.className, 'PerfScroll-rail-thumb');
-        addClass(this.container.className, ' PerfScroll');
+        addClass(this.rail, 'PerfScroll-rail');
+        addClass(this.railThumb, 'PerfScroll-rail-thumb');
+        addClass(this.container, ' PerfScroll');
         this.container.setAttribute('data-perfscroll-id', lastInstanceId);
         this.rail.appendChild(this.railThumb);
         this.container.appendChild(this.rail);
