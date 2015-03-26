@@ -1,4 +1,6 @@
 (function() {
+    "use strict";
+
     var defaults = {
         container: null
     },
