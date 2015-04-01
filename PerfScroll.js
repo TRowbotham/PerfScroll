@@ -346,16 +346,17 @@
 
     function onTouchMove() {
         for (var i = 0, len = this.lastMoveEvent.changedTouches.length; i < len; i++) {
-            var coord = Math.min(this.railHeight - this.railThumbHeight, Math.max(0, this.lastMoveEvent.changedTouches[i].pageY - this.rail.getBoundingClientRect().top - (this.currentY - this.currentTop)));
-            var scroll = coord / (this.railHeight - this.railThumbHeight);
-            var diff = scroll * this.scrollTopMax - this.currentScrollTop;
+            var diff = this.lastMoveEvent.changedTouches[i].pageY - this.currentY;
 
-            this.currentScrollTop += diff;
+            this.currentScrollTop = Math.min(this.scrollTopMax, Math.max(0, this.currentScrollTop - diff));
 
-            this.railThumb.style.top = coord + 'px';
+            this.railThumb.style.top = Math.min(this.railHeight - this.railThumbHeight, Math.max(0,
+                this.currentScrollTop / this.scrollTopMax * (this.railHeight - this.railThumbHeight))) + 'px';
             this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
 
-            scrollTo(this.container, 0, scroll * this.scrollTopMax);
+            scrollTo(this.container, 0, this.currentScrollTop);
+
+            this.currentY = this.lastMoveEvent.changedTouches[i].pageY;
         }
 
         this.frame.finish();
