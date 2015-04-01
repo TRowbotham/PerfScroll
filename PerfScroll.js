@@ -207,7 +207,7 @@
         this.containerHeight = this.container.clientHeight;
         this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
         this.lastMoveEvent = null;
-        this.lastWheelEven = null;
+        this.lastWheelEvent = null;
 
         this.container.addEventListener('scroll', this, false);
         this.railThumb.addEventListener('mousedown', this, false);
