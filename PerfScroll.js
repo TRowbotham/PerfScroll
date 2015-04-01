@@ -1,5 +1,5 @@
 (function() {
-    "use strict";
+    'use strict';
 
     var defaults = {
         container: null
@@ -47,6 +47,142 @@
         wheelEventName = 'DOMMouseScroll';
     }
 
+    function normalizeWheelEvent(aEvent) {
+        // https://developer.mozilla.org/en-US/docs/Web/Events/wheel#Listening_to_this_event_across_browser
+        var event = {
+            originalEvent: aEvent,
+            target: aEvent.target || aEvent.srcElement,
+            type: 'wheel',
+            deltaMode: 1,
+            deltaX: 0,
+            deltaY: 0,
+            preventDefault: function() {
+                ('preventDefault' in aEvent) ? aEvent.preventDefault() : aEvent.returnValue = false;
+            }
+        };
+
+        switch (aEvent.type) {
+            case 'wheel':
+                event.deltaY = aEvent.deltaY > 0 ?
+                    (aEvent.deltaY == 120 ? aEvent.deltaY : 120) :
+                    (aEvent.deltaY == -120 ? aEvent.deltaY : -120);
+
+                event.deltaX = aEvent.deltaX > 0 ?
+                    (aEvent.deltaX == 120 ? aEvent.deltaX : 120) :
+                    (aEvent.deltaX == -120 ? aEvent.deltaX : -120);
+
+                break;
+
+            case 'mousewheel':
+                event.deltaY = -aEvent.wheelDelta;
+                aEvent.wheelDeltaX && (event.deltaX = -aEvent.wheelDeltaX);
+
+                break;
+
+            case 'DOMMouseScroll':
+                event.deltaY = aEvent.axis == 2 ? aEvent.detail * 40 : 0;
+                event.deltaX = aEvent.axis == 1 ? aEvent.detail * 40 : 0;
+        }
+
+        return event;
+    }
+
+    function bind(aFunction, aContext, aArg) {
+        return function() {
+            return aFunction.call(aContext, aArg);
+        };
+    }
+
+    function addClass(aElement, aClass) {
+        if (supportsClassList) {
+            aElement.classList.add(aClass);
+        } else {
+            var classes = (aElement.className || '').split(' '),
+                index = classes.indexOf(aClass);
+
+            if (index < 0) {
+                classes.push(aClass);
+                aElement.className = classes.join(' ');
+            }
+        }
+    }
+
+    function removeClass(aElement, aClass) {
+        if (supportsClassList) {
+            aElement.classList.remove(aClass);
+        } else {
+            var classes = (aElement.className || '').split(' '),
+                index = classes.indexOf(aClass);
+
+            if (index > -1) {
+                classes.splice(index, 1);
+                aElement.className = classes.join(' ');
+            }
+        }
+    }
+
+    function scrollTo(aElement, aX, aY) {
+        if ('scrollTo' in aElement) {
+            aElement.scrollTo(aX, aY);
+        } else {
+            aElement.scrollLeft = aX;
+            aElement.scrollTop = aY;
+        }
+    }
+
+    function onWheel() {
+        var event = normalizeWheelEvent(this.lastWheelEvent);
+
+        this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + event.deltaY)) + 'px';
+        scrollTo(this.container, 0, this.container.scrollTop + event.deltaY);
+
+        this.frame.finish();
+    }
+
+    function onScroll() {
+        var scrollTop = this.container.scrollTop,
+            scroll = scrollTop / this.scrollTopMax;
+
+        this.railThumb.style.top = scroll * (this.railHeight - this.railThumbHeight) + 'px';
+        this.rail.style.top = scrollTop + 'px';
+
+        this.frame.finish();
+    }
+
+    function onMouseMove() {
+        var coord = Math.min(this.railHeight - this.railThumbHeight, Math.max(0, this.lastMoveEvent.pageY -
+            this.rail.getBoundingClientRect().top - (this.currentY - this.currentTop)));
+        var scroll = coord / (this.railHeight - this.railThumbHeight);
+        var diff = scroll * this.scrollTopMax - this.currentScrollTop;
+
+        this.currentScrollTop += diff;
+
+        this.railThumb.style.top = coord + 'px';
+        this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
+
+        scrollTo(this.container, 0, scroll * this.scrollTopMax);
+
+        this.frame.finish();
+    }
+
+    function onTouchMove() {
+        for (var i = 0, len = this.lastMoveEvent.changedTouches.length; i < len; i++) {
+            var diff = this.lastMoveEvent.changedTouches[i].pageY - this.currentY;
+
+            this.currentScrollTop = Math.min(this.scrollTopMax, Math.max(0, this.currentScrollTop - diff));
+
+            this.railThumb.style.top = Math.min(this.railHeight - this.railThumbHeight, Math.max(0,
+                this.currentScrollTop / this.scrollTopMax * (this.railHeight - this.railThumbHeight))) + 'px';
+            this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
+
+            scrollTo(this.container, 0, this.currentScrollTop);
+
+            this.currentY = this.lastMoveEvent.changedTouches[i].pageY;
+        }
+
+        this.frame.finish();
+    }
+
     function PerfScroll(aOptions) {
         if (!(this instanceof PerfScroll)) {
             return new PerfScroll(aOptions);
@@ -70,8 +206,8 @@
         this.railThumbHeight = this.railThumb.clientHeight;
         this.containerHeight = this.container.clientHeight;
         this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
-        this.lastMoveEvent;
-        this.lastWheelEvent;
+        this.lastMoveEvent = null;
+        this.lastWheelEven = null;
 
         this.container.addEventListener('scroll', this, false);
         this.railThumb.addEventListener('mousedown', this, false);
@@ -225,142 +361,6 @@
         delete this.frame;
         delete this.isTicking;
     };
-
-    function normalizeWheelEvent(aEvent) {
-        var event = {
-            originalEvent: aEvent,
-            target: aEvent.target || aEvent.srcElement,
-            type: 'wheel',
-            deltaMode: 1,
-            deltaX: 0,
-            deltaY: 0,
-            preventDefault: function() {
-                'preventDefault' in aEvent ?
-                    aEvent.preventDefault() :
-                    aEvent.returnValue = false;
-            }
-        };
-
-        switch (aEvent.type) {
-            case 'wheel':
-                event.deltaY = aEvent.deltaY > 0 ?
-                    (aEvent.deltaY == 120 ? aEvent.deltaY : 120) :
-                    (aEvent.deltaY == -120 ? aEvent.deltaY : -120);
-
-                event.deltaX = aEvent.deltaX > 0 ?
-                    (aEvent.deltaX == 120 ? aEvent.deltaX : 120) :
-                    (aEvent.deltaX == -120 ? aEvent.deltaX : -120);
-
-                break;
-
-            case 'mousewheel':
-                event.deltaY = -aEvent.wheelDelta;
-                aEvent.wheelDeltaX && (event.deltaX = -aEvent.wheelDeltaX);
-
-                break;
-
-            case 'DOMMouseScroll':
-                event.deltaY = aEvent.axis == 2 ? aEvent.detail * 40 : 0;
-                event.deltaX = aEvent.axis == 1 ? aEvent.detail * 40 : 0;
-        }
-
-        return event;
-    }
-
-    function bind(aFunction, aContext, aArg) {
-        return function() {
-            return aFunction.call(aContext, aArg);
-        };
-    }
-
-    function addClass(aElement, aClass) {
-        if (supportsClassList) {
-            aElement.classList.add(aClass);
-        } else {
-            var classes = (aElement.className || '').split(' '),
-                index = classes.indexOf(aClass);
-
-            if (index < 0) {
-                classes.push(aClass);
-                aElement.className = classes.join(' ');
-            }
-        }
-    }
-
-    function removeClass(aElement, aClass) {
-        if (supportsClassList) {
-            aElement.classList.remove(aClass);
-        } else {
-            var classes = (aElement.className || '').split(' '),
-                index = classes.indexOf(aClass);
-
-            if (index > -1) {
-                classes.splice(index, 1);
-                aElement.className = classes.join(' ');
-            }
-        }
-    }
-
-    function scrollTo(aElement, aX, aY) {
-        if ('scrollTo' in aElement) {
-            aElement.scrollTo(aX, aY);
-        } else {
-            aElement.scrollLeft = aX;
-            aElement.scrollTop = aY;
-        }
-    }
-
-    function onWheel() {
-        var event = normalizeWheelEvent(this.lastWheelEvent);
-
-        this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + event.deltaY)) + 'px';
-        scrollTo(this.container, 0, this.container.scrollTop + event.deltaY);
-
-        this.frame.finish();
-    }
-
-    function onScroll() {
-        var scrollTop = this.container.scrollTop,
-            scroll = scrollTop / this.scrollTopMax;
-
-        this.railThumb.style.top = scroll * (this.railHeight - this.railThumbHeight) + 'px';
-        this.rail.style.top = scrollTop + 'px';
-
-        this.frame.finish();
-    }
-
-    function onMouseMove() {
-        var coord = Math.min(this.railHeight - this.railThumbHeight, Math.max(0, this.lastMoveEvent.pageY - this.rail.getBoundingClientRect().top - (this.currentY - this.currentTop)));
-        var scroll = coord / (this.railHeight - this.railThumbHeight);
-        var diff = scroll * this.scrollTopMax - this.currentScrollTop;
-
-        this.currentScrollTop += diff;
-
-        this.railThumb.style.top = coord + 'px';
-        this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
-
-        scrollTo(this.container, 0, scroll * this.scrollTopMax);
-
-        this.frame.finish();
-    }
-
-    function onTouchMove() {
-        for (var i = 0, len = this.lastMoveEvent.changedTouches.length; i < len; i++) {
-            var diff = this.lastMoveEvent.changedTouches[i].pageY - this.currentY;
-
-            this.currentScrollTop = Math.min(this.scrollTopMax, Math.max(0, this.currentScrollTop - diff));
-
-            this.railThumb.style.top = Math.min(this.railHeight - this.railThumbHeight, Math.max(0,
-                this.currentScrollTop / this.scrollTopMax * (this.railHeight - this.railThumbHeight))) + 'px';
-            this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
-
-            scrollTo(this.container, 0, this.currentScrollTop);
-
-            this.currentY = this.lastMoveEvent.changedTouches[i].pageY;
-        }
-
-        this.frame.finish();
-    }
 
     window.PerfScroll = PerfScroll;
 })();
