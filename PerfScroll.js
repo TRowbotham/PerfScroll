@@ -345,6 +345,7 @@
 
     Frame.prototype.stop = function() {
         cancelAnimFrame(this.frame);
+        this.isLocked = false;
     };
 
     Frame.prototype.destroy = function() {
