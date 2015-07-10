@@ -10,13 +10,17 @@
 
     lastInstanceId = 0,
 
+    supportsTouchEvents = 'ontouchstart' in window,
+
+    supportsPointerEvents = 'PointerEvent' in window,
+
+    supportsClassList = 'classList' in document.documentElement,
+
     pointerEvents = {
         pointerdown: ('PointerEvent' in window ? 'pointerdown' : 'mspointerdown'),
         pointermove: ('PointerEvent' in window ? 'pointermove' : 'mspointermove'),
         pointerup: ('PointerEvent' in window ? 'pointerup' : 'mspointerup')
     },
-
-    supportsClassList = 'classList' in document.documentElement,
 
     lastTime = 0,
 
@@ -214,11 +218,18 @@
         this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
         this.lastMoveEvent = null;
 
+        if (supportsPointerEvents) {
+            this.container.addEventListener(pointerEvents.pointerdown, this, false);
+        } else {
+            this.railThumb.addEventListener('mousedown', this, false);
+
+            if (supportsTouchEvents) {
+                this.container.addEventListener('touchstart', this, false);
+            }
+        }
+
         this.container.addEventListener('scroll', this, false);
-        this.railThumb.addEventListener('mousedown', this, false);
         this.container.addEventListener(wheelEventName, this, false);
-        this.container.addEventListener('touchstart', this, false);
-        this.container.addEventListener(pointerEvents.pointerdown, this, false);
     }
 
     PerfScroll.getInstance = function(aInstance) {
