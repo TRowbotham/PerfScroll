@@ -202,6 +202,7 @@
         instances[++lastInstanceId] = this;
         this.instanceId = lastInstanceId;
         this.options = extend({}, defaults, aOptions || {});
+        this.event = new Events();
         this.frame = new Frame();
         this.rail = document.createElement('div');
         this.railThumb = document.createElement('div');
@@ -219,17 +220,17 @@
         this.lastMoveEvent = null;
 
         if (supportsPointerEvents) {
-            this.container.addEventListener(pointerEvents.pointerdown, this, false);
+            this.event.addListener(this.container, pointerEvents.pointerdown, this, false);
         } else {
-            this.railThumb.addEventListener('mousedown', this, false);
+            this.event.addListener(this.railThumb, 'mousedown', this, false);
 
             if (supportsTouchEvents) {
-                this.container.addEventListener('touchstart', this, false);
+                this.event.addListener(this.container, 'touchstart', this, false);
             }
         }
 
-        this.container.addEventListener('scroll', this, false);
-        this.container.addEventListener(wheelEventName, this, false);
+        this.event.addListener(this.container, 'scroll', this, false);
+        this.event.addListener(this.container, wheelEventName, this, false);
     }
 
     PerfScroll.getInstance = function(aInstance) {
@@ -269,9 +270,9 @@
                     this.currentScrollTop = this.container.scrollTop;
                     this.currentY = e.clientY;
 
-                    this.container.removeEventListener('scroll', this, false);
-                    window.addEventListener('mousemove', this, false);
-                    window.addEventListener('mouseup', this, false);
+                    this.event.removeListener(this.container, 'scroll', this, false);
+                    this.event.addListener(window, 'mousemove', this, false);
+                    this.event.addListener(window, 'mouseup', this, false);
 
                     break;
 
@@ -283,9 +284,9 @@
 
                 case 'mouseup':
 
-                    this.container.addEventListener('scroll', this, false);
-                    window.removeEventListener('mousemove', this, false);
-                    window.removeEventListener('mouseup', this, false);
+                    this.event.addListener(this.container, 'scroll', this, false);
+                    this.event.removeListener(window, 'mousemove', this, false);
+                    this.event.removeListener(window, 'mouseup', this, false);
 
                     break;
 
@@ -296,9 +297,9 @@
                     this.currentScrollTop = this.container.scrollTop;
                     this.currentY = e.changedTouches[0].pageY;
 
-                    this.container.removeEventListener('scroll', this, false);
-                    window.addEventListener('touchmove', this, false);
-                    window.addEventListener('touchend', this, false);
+                    this.event.removeListener(this.container, 'scroll', this, false);
+                    this.event.addListener(window, 'touchmove', this, false);
+                    this.event.addListener(window, 'touchend', this, false);
 
                     break;
 
@@ -309,9 +310,9 @@
                     break;
 
                 case 'touchend':
-                    this.container.addEventListener('scroll', this, false);
-                    window.removeEventListener('touchmove', this, false);
-                    window.removeEventListener('touchend', this, false);
+                    this.event.addListener(this.container, 'scroll', this, false);
+                    this.event.removeListener('touchmove', this, false);
+                    this.event.removeListener('touchend', this, false);
 
                     break;
             }
@@ -325,15 +326,16 @@
         },
 
         destroy: function() {
-            this.container.removeEventListener('scroll', this, false);
-            this.railThumb.removeEventListener('mousedown', this, false);
-            this.container.removeEventListener(wheelEventName, this, false);
-            this.container.removeEventListener('touchstart', this, false);
-            this.container.removeEventListener(pointerEvents.pointerdown, this, false);
+            this.event.removeListener(this.container, 'scroll', this, false);
+            this.event.removeListener(this.railThumb, 'mousedown', this, false);
+            this.event.removeListener(this.container, wheelEventName, this, false);
+            this.event.removeListener(this.container, 'touchstart', this, false);
+            this.event.removeListener(this.container, pointerEvents.pointerdown, this, false);
             this.container.removeAttribute('data-perfscroll-id');
             this.container.removeChild(this.rail);
             removeClass(this.container, 'PerfScroll');
             this.frame.destroy();
+            this.event.destroy();
             delete this.frame;
             delete instances[this.instanceId];
             delete this.instanceId;
@@ -377,6 +379,54 @@
     Frame.prototype.destroy = function() {
         this.stop();
         delete this.frame;
+    };
+
+    function Events() {
+        this.callbackMap = {};
+        this.supportsModernEvents = 'addEventListener' in window;
+    }
+
+    Events.prototype.addListener = function(aElement, aEvent, aCallback, aBubbles) {
+        var bubbles = aBubbles || false;
+
+        if (this.supportsModernEvents) {
+            aElement.addEventListener(aEvent, aCallback, bubbles);
+        } else {
+            if (typeof aCallback == 'object' && aCallback.handleEvent) {
+                if (aEvent in this.callbackMap) {
+                    this.removeListener(aElement, aEvent, this.callbackMap[aEvent], bubbles);
+                }
+
+                this.callbackMap[aEvent] = function() {
+                    aCallback.handleEvent.call(aCallback);
+                };
+
+                aElement.attachEvent('on' + aEvent, this.callbackMap[aEvent]);
+            } else {
+                aElement.attachEvent('on' + aEvent, aCallback);
+            }
+        }
+    };
+
+    Events.prototype.removeListener = function(aElement, aEvent, aCallback, aBubbles) {
+        var bubbles = aBubbles || false;
+
+        if (this.supportsModernEvents) {
+            aElement.removeEventListener(aEvent, aCallback, bubbles);
+        } else {
+            if (typeof aCallback == 'object' && aCallback.handleEvent) {
+                if (aEvent in this.callbackMap) {
+                    aElement.detachEvent('on' + aEvent, this.callbackMap[aEvent]);
+                    delete this.callbackMap[aEvent];
+                }
+            } else {
+                aElement.detachEvent('on' + aEvent, aCallback);
+            }
+        }
+    };
+
+    Events.prototype.destroy = function() {
+        delete this.callbackMap;
     };
 
     window.PerfScroll = PerfScroll;
