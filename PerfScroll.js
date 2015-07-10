@@ -230,6 +230,7 @@
 
         instances[++lastInstanceId] = this;
         this.instanceId = lastInstanceId;
+        this.options = extend({}, defaults, aOptions || {});
         this.frame = new Frame();
         this.rail = document.createElement('div');
         this.railThumb = document.createElement('div');
