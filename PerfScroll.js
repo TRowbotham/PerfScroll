@@ -195,18 +195,22 @@
     function PerfScroll(aOptions) {
         if (!(this instanceof PerfScroll)) {
             return new PerfScroll(aOptions);
-        } else if (aOptions.hasAttribute('data-perfscroll-id')) {
+        }
+
+        var options = extend({}, defaults, aOptions || {});
+
+        if (options.container.hasAttribute('data-perfscroll-id')) {
             return PerfScroll.getInstance(aOptions);
         }
 
         instances[++lastInstanceId] = this;
         this.instanceId = lastInstanceId;
-        this.options = extend({}, defaults, aOptions || {});
+        this.options = options;
         this.event = new Events();
         this.frame = new Frame();
         this.rail = document.createElement('div');
         this.railThumb = document.createElement('div');
-        this.container = aOptions;
+        this.container = this.options.container;
         addClass(this.rail, 'PerfScroll-rail');
         addClass(this.railThumb, 'PerfScroll-rail-thumb');
         addClass(this.container, 'PerfScroll');
