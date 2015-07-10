@@ -146,7 +146,7 @@
     }
 
     function onWheel() {
-        this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + event.deltaY)) + 'px';
+        this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + this.options.wheelIncrement)) + 'px';
         scrollTo(this.container, 0, this.container.scrollTop + this.options.wheelIncrement);
     }
 
@@ -213,7 +213,6 @@
         this.containerHeight = this.container.clientHeight;
         this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
         this.lastMoveEvent = null;
-        this.lastWheelEvent = null;
 
         this.container.addEventListener('scroll', this, false);
         this.railThumb.addEventListener('mousedown', this, false);
@@ -240,8 +239,6 @@
                 case 'DOMMouseScroll':
                     stopPropagation(e);
                     preventDefault(e);
-
-                    this.lastWheelEvent = e;
                     this.frame.request(bind(onWheel, this));
 
                     break;
