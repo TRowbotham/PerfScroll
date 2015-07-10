@@ -336,18 +336,18 @@
 
     function Frame() {
         this.frame = null;
-        this.isTicking = false;
+        this.isLocked = false;
     }
 
     Frame.prototype.request = function(aCallback) {
-        if (!this.isTicking) {
-            this.isTicking = true;
+        if (!this.isLocked) {
+            this.isLocked = true;
             this.frame = requestAnimFrame(aCallback);
         }
     };
 
     Frame.prototype.finish = function() {
-        this.isTicking = false;
+        this.isLocked = false;
     };
 
     Frame.prototype.stop = function() {
@@ -357,7 +357,6 @@
     Frame.prototype.destroy = function() {
         this.stop();
         delete this.frame;
-        delete this.isTicking;
     };
 
     window.PerfScroll = PerfScroll;
