@@ -120,6 +120,22 @@
         }
     }
 
+    function preventDefault(aEvent) {
+        if ('preventDefault' in aEvent) {
+            aEvent.preventDefault();
+        } else {
+            aEvent.returnValue = false;
+        }
+    }
+
+    function stopPropagation(aEvent) {
+        if ('stopPropagation' in aEvent) {
+            aEvent.stopPropagation();
+        } else {
+            aEvent.cancelBubble = true;
+        }
+    }
+
     function scrollTo(aElement, aX, aY) {
         if ('scrollTo' in aElement) {
             aElement.scrollTo(aX, aY);
@@ -216,32 +232,34 @@
         constructor: PerfScroll,
 
         handleEvent: function(aEvent) {
-            switch (aEvent.type) {
+            var e = aEvent || event;
+
+            switch (e.type) {
                 case 'wheel':
                 case 'mousewheel':
                 case 'DOMMouseScroll':
-                    aEvent.stopPropagation();
-                    aEvent.preventDefault();
+                    stopPropagation(e);
+                    preventDefault(e);
 
-                    this.lastWheelEvent = aEvent;
+                    this.lastWheelEvent = e;
                     this.frame.request(bind(onWheel, this));
 
                     break;
 
                 case 'scroll':
-                    aEvent.preventDefault();
-                    aEvent.stopPropagation();
+                    preventDefault(e);
+                    stopPropagation(e);
 
                     this.frame.request(bind(onScroll, this));
 
                     break;
 
                 case 'mousedown':
-                    aEvent.stopPropagation();
-                    aEvent.preventDefault();
+                    stopPropagation(e);
+                    preventDefault(e);
                     this.currentTop = this.railThumb.getBoundingClientRect().top;
                     this.currentScrollTop = this.container.scrollTop;
-                    this.currentY = aEvent.pageY;
+                    this.currentY = e.clientY;
 
                     this.container.removeEventListener('scroll', this, false);
                     window.addEventListener('mousemove', this, false);
@@ -250,7 +268,7 @@
                     break;
 
                 case 'mousemove':
-                    this.lastMoveEvent = aEvent;
+                    this.lastMoveEvent = e;
                     this.frame.request(bind(onMouseMove, this));
 
                     break;
@@ -264,11 +282,11 @@
                     break;
 
                 case 'touchstart':
-                    aEvent.stopPropagation();
-                    aEvent.preventDefault();
+                    stopPropagation(e);
+                    preventDefault(e);
                     this.currentTop = this.railThumb.getBoundingClientRect().top;
                     this.currentScrollTop = this.container.scrollTop;
-                    this.currentY = aEvent.changedTouches[0].pageY;
+                    this.currentY = e.changedTouches[0].pageY;
 
                     this.container.removeEventListener('scroll', this, false);
                     window.addEventListener('touchmove', this, false);
@@ -277,7 +295,7 @@
                     break;
 
                 case 'touchmove':
-                    this.lastMoveEvent = aEvent;
+                    this.lastMoveEvent = e;
                     this.frame.request(bind(onTouchMove, this));
 
                     break;
