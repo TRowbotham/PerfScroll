@@ -93,6 +93,10 @@
         };
     }
 
+    function trim(aString) {
+        return aString.replace(/^\s+|\s+$/g, '');
+    }
+
     function addClass(aElement, aClass) {
         if (supportsClassList) {
             aElement.classList.add(aClass);
@@ -111,12 +115,28 @@
         if (supportsClassList) {
             aElement.classList.remove(aClass);
         } else {
-            var classes = (aElement.className || '').split(' '),
-                index = classes.indexOf(aClass);
+            if (!aElement.className) {
+                return;
+            }
 
-            if (index > -1) {
-                classes.splice(index, 1);
-                aElement.className = classes.join(' ');
+            var classStr = trim(aElement.className.replace(/[\t\r\n\f]/g, ' '));
+            var classes = classStr.split(' ');
+            var len;
+
+            classStr = ' ' + classStr + ' ';
+
+            if ((len = classes.length)) {
+                for (var i = 0; i < len; i++) {
+                    while (classStr.indexOf(' ' + aClass + ' ') >= 0) {
+                        classStr = classStr.replace(' ' + aClass + ' ', ' ');
+                    }
+                }
+            }
+
+            var finalVal = trim(classStr) || '';
+
+            if (classStr !== finalVal) {
+                aElement.className = finalVal;
             }
         }
     }
