@@ -132,8 +132,6 @@
     function onWheel() {
         this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + event.deltaY)) + 'px';
         scrollTo(this.container, 0, this.container.scrollTop + this.options.wheelIncrement);
-
-        this.frame.finish();
     }
 
     function onScroll() {
@@ -142,8 +140,6 @@
 
         this.railThumb.style.top = scroll * (this.railHeight - this.railThumbHeight) + 'px';
         this.rail.style.top = scrollTop + 'px';
-
-        this.frame.finish();
     }
 
     function onMouseMove() {
@@ -158,8 +154,6 @@
         this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
 
         scrollTo(this.container, 0, scroll * this.scrollTopMax);
-
-        this.frame.finish();
     }
 
     function onTouchMove() {
@@ -176,8 +170,6 @@
 
             this.currentY = this.lastMoveEvent.changedTouches[i].pageY;
         }
-
-        this.frame.finish();
     }
 
     function PerfScroll(aOptions) {
@@ -340,14 +332,15 @@
     }
 
     Frame.prototype.request = function(aCallback) {
+        var self = this;
+
         if (!this.isLocked) {
             this.isLocked = true;
-            this.frame = requestAnimFrame(aCallback);
+            this.frame = requestAnimFrame(function() {
+                aCallback();
+                self.isLocked = false;
+            });
         }
-    };
-
-    Frame.prototype.finish = function() {
-        this.isLocked = false;
     };
 
     Frame.prototype.stop = function() {
