@@ -30,19 +30,43 @@
 
     wheelEventName,
 
-    requestAnimFrame = Modernizr.prefixed( 'requestAnimationFrame', window ) || function( aCallback ) {
-        currTime = new Date().getTime();
-        timeToCall = Math.max(0, 16 - (currTime - lastTime));
-        lastTime = currTime + timeToCall;
+    requestAnimFrame,
 
-        return setTimeout(function() {
-            aCallback(lastTime);
-        }, timeToCall);
-    },
+    cancelAnimFrame;
 
-    cancelAnimFrame = Modernizr.prefixed( 'cancelAnimationFrame', window ) || function( aId ) {
-        clearTimeout( aId );
-    };
+    (function() {
+        if ('requestAnimationFrame' in window) {
+            requestAnimFrame = window.requestAnimationFrame;
+            cancelAnimFrame = window.cancelAnimationFrame;
+            return;
+        }
+
+        var prefixes = ['webkit', 'moz'],
+            lastTime = 0, currTime, timeToCall, prefix;
+
+        for (var i = 0, len = prefixes.length; i < len; i++) {
+            var prop = prefixes[i] + 'RequestAnimationFrame';
+
+            if (prop in window) {
+                prefix = prefixes[i];
+                break;
+            }
+        }
+
+        requestAnimFrame = window[prefix + 'RequestAnimationFrame'] || function(aCallback) {
+            currTime = new Date().getTime();
+            timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            lastTime = currTime + timeToCall;
+
+            return setTimeout(function() {
+                aCallback(lastTime);
+            }, timeToCall);
+        };
+
+        cancelAnimFrame = window[prefix + 'CancelAnimationFrame'] || function(aId) {
+            clearTimeout(aId);
+        };
+    })();
 
     if ('onwheel' in document.documentElement) {
         wheelEventName = 'wheel';
