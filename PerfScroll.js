@@ -93,6 +93,24 @@
         };
     }
 
+    function extend(aTarget) {
+        if ('assign' in Object) {
+            return Object.assign.apply(null, arguments);
+        } else {
+            var len = arguments.length;
+
+            for (var i = 1; i < len; i++) {
+                for (var name in arguments[i]) {
+                    if (arguments[i].hasOwnProperty(name)) {
+                        aTarget[name] = arguments[i][name];
+                    }
+                }
+            }
+
+            return aTarget;
+        }
+    }
+
     function trim(aString) {
         return aString.replace(/^\s+|\s+$/g, '');
     }
