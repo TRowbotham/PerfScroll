@@ -108,12 +108,20 @@
         if (supportsClassList) {
             aElement.classList.add(aClass);
         } else {
-            var classes = (aElement.className || '').split(' '),
-                index = classes.indexOf(aClass);
+            var classStr = trim(aElement.className.replace(/[\t\r\n\f]/g, ' ')),
+                classes = classStr.split(' '),
+                finalVal;
 
-            if (index < 0) {
-                classes.push(aClass);
-                aElement.className = classes.join(' ');
+            classStr = ' ' + classStr + ' ';
+
+            if (classStr.indexOf(' ' + aClass + ' ') < 0) {
+                classStr += aClass + ' ';
+            }
+
+            finalVal = trim(classStr) || '';
+
+            if (finalVal !== aElement.className) {
+                aElement.className = finalVal;
             }
         }
     }
