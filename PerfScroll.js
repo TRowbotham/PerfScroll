@@ -2,7 +2,8 @@
     'use strict';
 
     var defaults = {
-        container: null
+        container: null,
+        wheelIncrement: 120
     },
 
     instances = {},
@@ -45,46 +46,6 @@
         wheelEventName = 'mousewheel';
     } else {
         wheelEventName = 'DOMMouseScroll';
-    }
-
-    function normalizeWheelEvent(aEvent) {
-        // https://developer.mozilla.org/en-US/docs/Web/Events/wheel#Listening_to_this_event_across_browser
-        var event = {
-            originalEvent: aEvent,
-            target: aEvent.target || aEvent.srcElement,
-            type: 'wheel',
-            deltaMode: 1,
-            deltaX: 0,
-            deltaY: 0,
-            preventDefault: function() {
-                ('preventDefault' in aEvent) ? aEvent.preventDefault() : aEvent.returnValue = false;
-            }
-        };
-
-        switch (aEvent.type) {
-            case 'wheel':
-                event.deltaY = aEvent.deltaY > 0 ?
-                    (aEvent.deltaY == 120 ? aEvent.deltaY : 120) :
-                    (aEvent.deltaY == -120 ? aEvent.deltaY : -120);
-
-                event.deltaX = aEvent.deltaX > 0 ?
-                    (aEvent.deltaX == 120 ? aEvent.deltaX : 120) :
-                    (aEvent.deltaX == -120 ? aEvent.deltaX : -120);
-
-                break;
-
-            case 'mousewheel':
-                event.deltaY = -aEvent.wheelDelta;
-                aEvent.wheelDeltaX && (event.deltaX = -aEvent.wheelDeltaX);
-
-                break;
-
-            case 'DOMMouseScroll':
-                event.deltaY = aEvent.axis == 2 ? aEvent.detail * 40 : 0;
-                event.deltaX = aEvent.axis == 1 ? aEvent.detail * 40 : 0;
-        }
-
-        return event;
     }
 
     function bind(aFunction, aContext, aArg) {
@@ -169,10 +130,8 @@
     }
 
     function onWheel() {
-        var event = normalizeWheelEvent(this.lastWheelEvent);
-
         this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + event.deltaY)) + 'px';
-        scrollTo(this.container, 0, this.container.scrollTop + event.deltaY);
+        scrollTo(this.container, 0, this.container.scrollTop + this.options.wheelIncrement);
 
         this.frame.finish();
     }
