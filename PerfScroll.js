@@ -190,19 +190,19 @@
         var scrollTop = this.container.scrollTop,
             scroll = scrollTop / this.scrollTopMax;
 
-        this.railThumb.style.top = scroll * (this.railHeight - this.railThumbHeight) + 'px';
+        this.thumb.style.top = scroll * (this.railHeight - this.thumbHeight) + 'px';
         this.rail.style.top = scrollTop + 'px';
     }
 
     function onMouseMove() {
-        var coord = Math.min(this.railHeight - this.railThumbHeight, Math.max(0, this.lastY -
+        var coord = Math.min(this.railHeight - this.thumbHeight, Math.max(0, this.lastY -
             this.rail.getBoundingClientRect().top - (this.currentY - this.currentTop)));
-        var scroll = coord / (this.railHeight - this.railThumbHeight);
+        var scroll = coord / (this.railHeight - this.thumbHeight);
         var diff = scroll * this.scrollTopMax - this.currentScrollTop;
 
         this.currentScrollTop += diff;
 
-        this.railThumb.style.top = coord + 'px';
+        this.thumb.style.top = coord + 'px';
         this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
 
         scrollTo(this.container, 0, scroll * this.scrollTopMax);
@@ -214,8 +214,8 @@
 
             this.currentScrollTop = Math.min(this.scrollTopMax, Math.max(0, this.currentScrollTop - diff));
 
-            this.railThumb.style.top = Math.min(this.railHeight - this.railThumbHeight, Math.max(0,
-                this.currentScrollTop / this.scrollTopMax * (this.railHeight - this.railThumbHeight))) + 'px';
+            this.thumb.style.top = Math.min(this.railHeight - this.thumbHeight, Math.max(0,
+                this.currentScrollTop / this.scrollTopMax * (this.railHeight - this.thumbHeight))) + 'px';
             this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
 
             scrollTo(this.container, 0, this.currentScrollTop);
@@ -241,23 +241,23 @@
         this.event = new Events();
         this.frame = new Frame();
         this.rail = document.createElement('div');
-        this.railThumb = document.createElement('div');
+        this.thumb = document.createElement('div');
         this.container = this.options.container;
         addClass(this.rail, 'PerfScroll-rail');
-        addClass(this.railThumb, 'PerfScroll-rail-thumb');
+        addClass(this.thumb, 'PerfScroll-rail-thumb');
         addClass(this.container, 'PerfScroll');
         this.container.setAttribute('data-perfscroll-id', lastInstanceId);
-        this.rail.appendChild(this.railThumb);
+        this.rail.appendChild(this.thumb);
         this.container.appendChild(this.rail);
         this.railHeight = this.rail.clientHeight;
-        this.railThumbHeight = this.railThumb.clientHeight;
+        this.thumbHeight = this.thumb.clientHeight;
         this.containerHeight = this.container.clientHeight;
         this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
 
         if (supportsPointerEvents) {
             this.event.addListener(this.container, pointerEvents.pointerdown, this, false);
         } else {
-            this.event.addListener(this.railThumb, 'mousedown', this, false);
+            this.event.addListener(this.thumb, 'mousedown', this, false);
 
             if (supportsTouchEvents) {
                 this.event.addListener(this.container, 'touchstart', this, false);
@@ -310,7 +310,7 @@
                 case 'mousedown':
                     stopPropagation(e);
                     preventDefault(e);
-                    this.currentTop = this.railThumb.getBoundingClientRect().top;
+                    this.currentTop = this.thumb.getBoundingClientRect().top;
                     this.currentScrollTop = this.container.scrollTop;
                     this.currentY = e.clientY;
 
@@ -337,7 +337,7 @@
                 case 'touchstart':
                     stopPropagation(e);
                     preventDefault(e);
-                    this.currentTop = this.railThumb.getBoundingClientRect().top;
+                    this.currentTop = this.thumb.getBoundingClientRect().top;
                     this.currentScrollTop = this.container.scrollTop;
                     this.currentY = e.changedTouches[0].pageY;
 
@@ -364,14 +364,14 @@
 
         update: function() {
             this.railHeight = this.rail.clientHeight;
-            this.railThumbHeight = this.railThumb.clientHeight;
+            this.thumbHeight = this.thumb.clientHeight;
             this.containerHeight = this.container.clientHeight;
             this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
         },
 
         destroy: function() {
             this.event.removeListener(this.container, 'scroll', this, false);
-            this.event.removeListener(this.railThumb, 'mousedown', this, false);
+            this.event.removeListener(this.thumb, 'mousedown', this, false);
             this.event.removeListener(this.container, wheelEventName, this, false);
             this.event.removeListener(this.container, 'touchstart', this, false);
             this.event.removeListener(this.container, pointerEvents.pointerdown, this, false);
@@ -385,9 +385,9 @@
             delete this.instanceId;
             delete this.contianer;
             delete this.rail;
-            delete this.railThumb;
+            delete this.thumb;
             delete this.railHeight;
-            delete this.railThumbHeight;
+            delete this.thumbHeight;
             delete this.containerHeight;
             delete this.scrollTopMax;
             delete this.lastMoveEvent;
