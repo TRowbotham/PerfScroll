@@ -182,8 +182,8 @@
     }
 
     function onWheel() {
-        this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + this.options.wheelIncrement)) + 'px';
-        scrollTo(this.container, 0, this.container.scrollTop + this.options.wheelIncrement);
+        this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + this.lastY)) + 'px';
+        scrollTo(this.container, 0, this.container.scrollTop + this.lastY);
     }
 
     function onScroll() {
@@ -286,6 +286,15 @@
                 case 'DOMMouseScroll':
                     stopPropagation(e);
                     preventDefault(e);
+
+                    if ('deltaY' in e) {
+                        this.lastY = e.deltaY > 0 ? this.options.wheelIncrement : -(this.options.wheelIncrement);
+                    } else if ('wheelDelta' in e) {
+                        this.lastY = e.wheelDelta > 0 ? -(this.options.wheelIncrement) : this.options.wheelIncrement;
+                    } else {
+                        this.lastY = e.detail > 0 ? this.options.wheelIncrement : -(this.options.wheelIncrement)
+                    }
+
                     this.frame.request(bind(onWheel, this));
 
                     break;
