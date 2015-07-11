@@ -307,8 +307,8 @@
                     this.currentY = e.clientY;
 
                     this.event.removeListener(this.container, 'scroll', this, false);
-                    this.event.addListener(window, 'mousemove', this, false);
-                    this.event.addListener(window, 'mouseup', this, false);
+                    this.event.addListener(document, 'mousemove', this, false);
+                    this.event.addListener(document, 'mouseup', this, false);
 
                     break;
 
@@ -321,8 +321,8 @@
                 case 'mouseup':
 
                     this.event.addListener(this.container, 'scroll', this, false);
-                    this.event.removeListener(window, 'mousemove', this, false);
-                    this.event.removeListener(window, 'mouseup', this, false);
+                    this.event.removeListener(document, 'mousemove', this, false);
+                    this.event.removeListener(document, 'mouseup', this, false);
 
                     break;
 
