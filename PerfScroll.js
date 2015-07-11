@@ -194,20 +194,6 @@
         this.rail.style.top = scrollTop + 'px';
     }
 
-    function onMouseMove() {
-        var coord = Math.min(this.railHeight - this.thumbHeight, Math.max(0, this.lastY -
-            this.rail.getBoundingClientRect().top - (this.currentY - this.currentTop)));
-        var scroll = coord / (this.railHeight - this.thumbHeight);
-        var diff = scroll * this.scrollTopMax - this.currentScrollTop;
-
-        this.currentScrollTop += diff;
-
-        this.thumb.style.top = coord + 'px';
-        this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
-
-        scrollTo(this.container, 0, scroll * this.scrollTopMax);
-    }
-
     function onTouchMove() {
         for (var i = 0, len = this.lastMoveEvent.changedTouches.length; i < len; i++) {
             var diff = this.lastY - this.currentY;
@@ -277,6 +263,36 @@
     PerfScroll.prototype = {
         constructor: PerfScroll,
 
+        _handleMouseDown: function(aEvent) {
+            var target = 'target' in aEvent ? aEvent.target : aEvent.srcElement;
+
+            this.frame.stop();
+            this.grabDelta = aEvent.clientY - (this.thumb.getBoundingClientRect().top - this.rail.getBoundingClientRect().top);
+            this.event.removeListener(this.container, 'scroll', this, false);
+            this.event.addListener(document, 'mousemove', this, false);
+            this.event.addListener(document, 'mouseup', this, false);
+            stopPropagation(e);
+            preventDefault(e);
+        },
+
+        _handleMouseMove: function() {
+            this._scrollTo((this.lastY - this.grabDelta) / (this.railHeight - this.thumbHeight) * this.scrollTopMax);
+        },
+
+        _handleMouseUp: function() {
+            this.event.removeListener(document, 'mousemove', this, false);
+            this.event.removeListener(document, 'mouseup', this, false);
+            this.event.addListener(this.container, 'scroll', this, false);
+        },
+
+        _scrollTo: function(aY) {
+            var offset = Math.min(this.scrollTopMax, Math.max(0, aY)),
+                thumbY = (offset / this.scrollTopMax) * (this.railHeight - this.thumbHeight);
+
+            this.thumb.style.top = thumbY + 'px';
+            this.container.scrollTop = offset;
+        },
+
         handleEvent: function(aEvent) {
             var e = aEvent || event;
 
@@ -308,29 +324,24 @@
                     break;
 
                 case 'mousedown':
-                    stopPropagation(e);
-                    preventDefault(e);
-                    this.currentTop = this.thumb.getBoundingClientRect().top;
-                    this.currentScrollTop = this.container.scrollTop;
-                    this.currentY = e.clientY;
-
-                    this.event.removeListener(this.container, 'scroll', this, false);
-                    this.event.addListener(document, 'mousemove', this, false);
-                    this.event.addListener(document, 'mouseup', this, false);
+                    this._handleMouseDown(e);
 
                     break;
 
                 case 'mousemove':
+                    var self = this;
+
                     this.lastY = e.clientY;
-                    this.frame.request(bind(onMouseMove, this));
+                    this.frame.request(function() {
+                        self._handleMouseMove();
+                    });
+                    preventDefault(e);
+                    stopPropagation(e);
 
                     break;
 
                 case 'mouseup':
-
-                    this.event.addListener(this.container, 'scroll', this, false);
-                    this.event.removeListener(document, 'mousemove', this, false);
-                    this.event.removeListener(document, 'mouseup', this, false);
+                    this._handleMouseUp(e);
 
                     break;
 
