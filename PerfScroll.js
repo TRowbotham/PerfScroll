@@ -195,7 +195,7 @@
     }
 
     function onMouseMove() {
-        var coord = Math.min(this.railHeight - this.railThumbHeight, Math.max(0, this.lastMoveEvent.pageY -
+        var coord = Math.min(this.railHeight - this.railThumbHeight, Math.max(0, this.lastY -
             this.rail.getBoundingClientRect().top - (this.currentY - this.currentTop)));
         var scroll = coord / (this.railHeight - this.railThumbHeight);
         var diff = scroll * this.scrollTopMax - this.currentScrollTop;
@@ -210,7 +210,7 @@
 
     function onTouchMove() {
         for (var i = 0, len = this.lastMoveEvent.changedTouches.length; i < len; i++) {
-            var diff = this.lastMoveEvent.changedTouches[i].pageY - this.currentY;
+            var diff = this.lastY - this.currentY;
 
             this.currentScrollTop = Math.min(this.scrollTopMax, Math.max(0, this.currentScrollTop - diff));
 
@@ -220,7 +220,7 @@
 
             scrollTo(this.container, 0, this.currentScrollTop);
 
-            this.currentY = this.lastMoveEvent.changedTouches[i].pageY;
+            this.currentY = this.lastY;
         }
     }
 
@@ -253,7 +253,6 @@
         this.railThumbHeight = this.railThumb.clientHeight;
         this.containerHeight = this.container.clientHeight;
         this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
-        this.lastMoveEvent = null;
 
         if (supportsPointerEvents) {
             this.event.addListener(this.container, pointerEvents.pointerdown, this, false);
@@ -313,7 +312,7 @@
                     break;
 
                 case 'mousemove':
-                    this.lastMoveEvent = e;
+                    this.lastY = e.clientY;
                     this.frame.request(bind(onMouseMove, this));
 
                     break;
@@ -340,7 +339,7 @@
                     break;
 
                 case 'touchmove':
-                    this.lastMoveEvent = e;
+                    this.lastY = e.changedTouches[0].clientY;
                     this.frame.request(bind(onTouchMove, this));
 
                     break;
