@@ -320,6 +320,7 @@
             this.velocity = 0;
             this.distance = 0;
             this.count = 0;
+            stopPropagation(aEvent);
             this.event.addListener(window, (supportsPointerEvents ? pointerEvents.pointermove : 'touchmove'), this, false);
             this.event.addListener(window, (supportsPointerEvents ? pointerEvents.pointerup : 'touchend'), this, false);
         },
