@@ -431,6 +431,14 @@
             }
         },
 
+        scrollTo: function(aY) {
+            var self = this;
+
+            this.frame.request(function() {
+                self._scrollTo(aY);
+            });
+        },
+
         update: function() {
             this.railHeight = this.rail.clientHeight;
             this.thumbHeight = this.thumb.clientHeight;
