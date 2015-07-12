@@ -431,9 +431,14 @@
         },
 
         update: function() {
+            var scrollHeight = this.box.scrollHeight,
+                containerHeight = this.box.clientHeight;
+
             this.railHeight = this.rail.clientHeight;
-            this.thumbHeight = this.thumb.clientHeight;
-            this.scrollTopMax = this.box.scrollHeight - this.box.clientHeight;
+            this.thumbHeight = containerHeight / scrollHeight * this.railHeight;
+            this.scrollTopMax = scrollHeight - containerHeight;
+
+            this.thumb.style.height = containerHeight / scrollHeight * 100 + '%';
         },
 
         destroy: function() {
