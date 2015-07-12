@@ -76,12 +76,6 @@
         wheelEventName = 'DOMMouseScroll';
     }
 
-    function bind(aFunction, aContext, aArg) {
-        return function() {
-            return aFunction.call(aContext, aArg);
-        };
-    }
-
     function extend(aTarget) {
         if ('assign' in Object) {
             return Object.assign.apply(null, arguments);
@@ -184,14 +178,6 @@
     function onWheel() {
         this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + this.lastY)) + 'px';
         scrollTo(this.container, 0, this.container.scrollTop + this.lastY);
-    }
-
-    function onScroll() {
-        var scrollTop = this.container.scrollTop,
-            scroll = scrollTop / this.scrollTopMax;
-
-        this.thumb.style.top = scroll * (this.railHeight - this.thumbHeight) + 'px';
-        this.rail.style.top = scrollTop + 'px';
     }
 
     function PerfScroll(aOptions) {
@@ -321,10 +307,9 @@
                     break;
 
                 case 'scroll':
-                    preventDefault(e);
+                    this._scrollTo(this.container.scrollTop);
+                    this.event.removeListener(this.container, 'scroll', this, false);
                     stopPropagation(e);
-
-                    this.frame.request(bind(onScroll, this));
 
                     break;
 
