@@ -291,6 +291,7 @@
                 thumbTop = this.options.useCSSTransforms && transform ? getTransform(this.thumb) :
                            (this.thumb.getBoundingClientRect().top - this.rail.getBoundingClientRect().top);
                 this.grabDelta = aEvent.clientY - thumbTop;
+                addClass(this.container, 'PerfScroll-disable-select');
                 this.event.addListener(document, (supportsPointerEvents ? pointerEvents.pointermove : 'mousemove'), this, false);
                 this.event.addListener(document, (supportsPointerEvents ? pointerEvents.pointerup : 'mouseup'), this, false);
             } else if (target == this.rail) {
@@ -306,6 +307,7 @@
         },
 
         _handleMouseUp: function() {
+            removeClass(this.container, 'PerfScroll-disable-select');
             this.event.removeListener(document, (supportsPointerEvents ? pointerEvents.pointermove : 'mousemove'), this, false);
             this.event.removeListener(document, (supportsPointerEvents ? pointerEvents.pointerup : 'mouseup'), this, false);
         },

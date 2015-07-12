@@ -6,6 +6,13 @@
 	overflow: hidden;
 }
 
+.PerfScroll-disable-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .PerfScroll-box {
 	height: inherit;
 	max-height: inherit;
