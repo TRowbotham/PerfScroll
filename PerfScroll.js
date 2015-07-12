@@ -14,14 +14,16 @@
 
     supportsTouchEvents = 'ontouchstart' in window,
 
-    supportsPointerEvents = 'PointerEvent' in window,
+    supportsMSPointerEvents = 'MSPointerEvent' in window,
+
+    supportsPointerEvents = 'PointerEvent' in window || supportsMSPointerEvents,
 
     supportsClassList = 'classList' in document.documentElement,
 
     pointerEvents = {
-        pointerdown: ('PointerEvent' in window ? 'pointerdown' : 'mspointerdown'),
-        pointermove: ('PointerEvent' in window ? 'pointermove' : 'mspointermove'),
-        pointerup: ('PointerEvent' in window ? 'pointerup' : 'mspointerup')
+        pointerdown: (supportsMSPointerEvents ? 'mspointerdown' : (supportsPointerEvents ? 'pointerdown' : '')),
+        pointermove: (supportsMSPointerEvents ? 'mspointermove' : (supportsPointerEvents ? 'pointermove' : '')),
+        pointerup:  (supportsMSPointerEvents ? 'mspointerup' : (supportsPointerEvents ? 'pointerup' : ''))
     },
 
     lastTime = 0,
@@ -243,11 +245,15 @@
             var target = 'target' in aEvent ? aEvent.target : aEvent.srcElement;
 
             this.frame.stop();
-            this.grabDelta = aEvent.clientY - (this.thumb.getBoundingClientRect().top - this.rail.getBoundingClientRect().top);
-            this.event.addListener(document, 'mousemove', this, false);
-            this.event.addListener(document, 'mouseup', this, false);
-            stopPropagation(e);
-            preventDefault(e);
+
+            if (target == this.thumb) {
+                this.grabDelta = aEvent.clientY - (this.thumb.getBoundingClientRect().top - this.rail.getBoundingClientRect().top);
+                this.event.addListener(document, (supportsPointerEvents ? pointerEvents.pointermove : 'mousemove'), this, false);
+                this.event.addListener(document, (supportsPointerEvents ? pointerEvents.pointerup : 'mouseup'), this, false);
+            }
+
+            stopPropagation(aEvent);
+            preventDefault(aEvent);
         },
 
         _handleMouseMove: function() {
@@ -255,19 +261,19 @@
         },
 
         _handleMouseUp: function() {
-            this.event.removeListener(document, 'mousemove', this, false);
-            this.event.removeListener(document, 'mouseup', this, false);
+            this.event.removeListener(document, (supportsPointerEvents ? pointerEvents.pointermove : 'mousemove'), this, false);
+            this.event.removeListener(document, (supportsPointerEvents ? pointerEvents.pointerup : 'mouseup'), this, false);
         },
 
         _handleTouchStart: function(aEvent) {
             this.frame.stop();
-            this.reference = aEvent.changedTouches[0].clientY;
+            this.reference = supportsPointerEvents ? aEvent.clientY : aEvent.changedTouches[0].clientY;
             this.timestamp = Date.now();
             this.velocity = 0;
             this.distance = 0;
             this.count = 0;
-            this.event.addListener(window, 'touchmove', this, false);
-            this.event.addListener(window, 'touchend', this, false);
+            this.event.addListener(window, (supportsPointerEvents ? pointerEvents.pointermove : 'touchmove'), this, false);
+            this.event.addListener(window, (supportsPointerEvents ? pointerEvents.pointerup : 'touchend'), this, false);
         },
 
         _handleTouchMove: function() {
@@ -290,8 +296,8 @@
                 });
             }
 
-            this.event.removeListener(window, 'touchmove', this, false);
-            this.event.removeListener(window, 'touchend', this, false);
+            this.event.removeListener(window, (supportsPointerEvents ? pointerEvents.pointermove : 'touchmove'), this, false);
+            this.event.removeListener(window, (supportsPointerEvents ? pointerEvents.pointerup : 'touchend'), this, false);
         },
 
         _scrollTo: function(aY) {
@@ -307,6 +313,52 @@
             var e = aEvent || event;
 
             switch (e.type) {
+                case pointerEvents.pointerdown:
+                    switch (e.pointerType) {
+                        case 'mouse':
+                            this._handleMouseDown(e);
+
+                            break;
+
+                        default:
+                            this._handleTouchDown(e);
+                    }
+
+                    break;
+
+                case pointerEvents.pointermove:
+                    var self = this;
+
+                    this.lastY = e.clientY;
+                    this.frame.request(function() {
+                        switch (e.pointerType) {
+                            case 'mouse':
+                                self._handleMouseMove();
+
+                                break;
+
+                            default:
+                                self._handleTouchMove();
+                        }
+                    });
+                    preventDefault(e);
+                    stopPropagation(e);
+
+                    break;
+
+                case pointerEvents.pointerup:
+                    switch (e.pointerType) {
+                        case 'mouse':
+                            this._handleMouseUp();
+
+                            break;
+
+                        default:
+                            this._handleTouchEnd();
+                    }
+
+                    break;
+
                 case wheelEventName:
                     var self = this;
 
