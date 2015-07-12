@@ -6,6 +6,8 @@
         wheelIncrement: 120
     },
 
+    decay = 325,
+
     instances = {},
 
     lastInstanceId = 0,
@@ -220,6 +222,23 @@
     PerfScroll.prototype = {
         constructor: PerfScroll,
 
+        _autoScroll: function() {
+            var delta, elapsed,
+                self = this;
+
+            if (this.velocity && this.offset < this.scrollTopMax) {
+                elapsed = Date.now() - this.timestamp;
+                delta = -(this.velocity) * Math.exp(-(elapsed) / decay);
+
+                if (delta > 0.5 || delta < -0.5) {
+                    this._scrollTo(this.offset - delta);
+                    this.autoScrollRaf = requestAnimFrame(function() {
+                        self._autoScroll();
+                    });
+                }
+            }
+        },
+
         _handleMouseDown: function(aEvent) {
             var target = 'target' in aEvent ? aEvent.target : aEvent.srcElement;
 
@@ -245,6 +264,10 @@
         _handleTouchStart: function(aEvent) {
             this.frame.stop();
             this.reference = aEvent.changedTouches[0].clientY;
+            this.timestamp = Date.now();
+            this.velocity = 0;
+            this.distance = 0;
+            this.count = 0;
             this.event.removeListener(this.container, 'scroll', this, false);
             this.event.addListener(window, 'touchmove', this, false);
             this.event.addListener(window, 'touchend', this, false);
@@ -252,10 +275,24 @@
 
         _handleTouchMove: function() {
             this._scrollTo(this.offset + (this.reference - this.lastY));
+            this.distance += this.reference - this.lastY;
             this.reference = this.lastY;
+            this.count++;
         },
 
         _handleTouchEnd: function() {
+            var now = Date.now(),
+                self = this;
+
+            this.velocity = decay * (this.distance / this.count) / (now - this.timestamp);
+
+            if (this.velocity > 10 || this.velocity < -10) {
+                this.timestamp = now;
+                this.autoScrollRaf = requestAnimFrame(function() {
+                    self._autoScroll();
+                });
+            }
+
             this.event.removeListener(window, 'touchmove', this, false);
             this.event.removeListener(window, 'touchend', this, false);
             this.event.addListener(this.container, 'scroll', this, false);
