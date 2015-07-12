@@ -175,21 +175,27 @@
         this.options = options;
         this.event = new Events();
         this.frame = new Frame();
+        this.offset = 0;
+        this.container = this.options.container == document.documentElement ? document.body : this.options.container;
+        this.box = document.createElement('div');
         this.rail = document.createElement('div');
         this.thumb = document.createElement('div');
-        this.container = this.options.container;
+
         addClass(this.rail, 'PerfScroll-rail');
         addClass(this.thumb, 'PerfScroll-thumb');
         addClass(this.container, 'PerfScroll');
-        addClass(this.container, 'PerfScroll-overflow');
+        addClass(this.box, 'PerfScroll-overflow');
+        addClass(this.box, 'PerfScroll-box');
         this.container.setAttribute('data-perfscroll-id', lastInstanceId);
+
+        while (this.container.firstChild) {
+            this.box.appendChild(this.container.firstChild);
+        }
+
+        this.container.appendChild(this.box);
         this.rail.appendChild(this.thumb);
         this.container.appendChild(this.rail);
-        this.railHeight = this.rail.clientHeight;
-        this.thumbHeight = this.thumb.clientHeight;
-        this.containerHeight = this.container.clientHeight;
-        this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
-        this.offset = 0;
+        this.update();
 
         if (supportsPointerEvents) {
             this.event.addListener(this.container, pointerEvents.pointerdown, this, false);
@@ -201,8 +207,8 @@
             }
         }
 
-        this.event.addListener(this.container, 'scroll', this, false);
-        this.event.addListener(this.container, wheelEventName, this, false);
+        this.event.addListener(this.box, 'scroll', this, false);
+        this.event.addListener(this.box, wheelEventName, this, false);
     }
 
     PerfScroll.getInstance = function(aInstance) {
@@ -298,7 +304,7 @@
 
             this.offset = offset;
             this.thumb.style.top = thumbY + 'px';
-            this.container.scrollTop = offset;
+            this.box.scrollTop = offset;
         },
 
         handleEvent: function(aEvent) {
@@ -368,8 +374,8 @@
                     break;
 
                 case 'scroll':
-                    this._scrollTo(this.container.scrollTop);
-                    this.event.removeListener(this.container, 'scroll', this, false);
+                    this._scrollTo(this.box.scrollTop);
+                    this.event.removeListener(this.box, 'scroll', this, false);
                     stopPropagation(e);
 
                     break;
@@ -427,8 +433,7 @@
         update: function() {
             this.railHeight = this.rail.clientHeight;
             this.thumbHeight = this.thumb.clientHeight;
-            this.containerHeight = this.container.clientHeight;
-            this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
+            this.scrollTopMax = this.box.scrollHeight - this.box.clientHeight;
         },
 
         destroy: function() {

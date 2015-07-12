@@ -6,6 +6,11 @@
 	overflow: hidden;
 }
 
+.PerfScroll-box {
+	height: inherit;
+	max-height: inherit;
+}
+
 .PerfScroll-rail {
 	background-color: blue;
 	height: 100%;
