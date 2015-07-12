@@ -166,20 +166,6 @@
         }
     }
 
-    function scrollTo(aElement, aX, aY) {
-        if ('scrollTo' in aElement) {
-            aElement.scrollTo(aX, aY);
-        } else {
-            aElement.scrollLeft = aX;
-            aElement.scrollTop = aY;
-        }
-    }
-
-    function onWheel() {
-        this.rail.style.top = Math.min(this.scrollTopMax, Math.max(0, this.rail.offsetTop + this.lastY)) + 'px';
-        scrollTo(this.container, 0, this.container.scrollTop + this.lastY);
-    }
-
     function PerfScroll(aOptions) {
         if (!(this instanceof PerfScroll)) {
             return new PerfScroll(aOptions);
@@ -387,11 +373,6 @@
             delete this.thumbHeight;
             delete this.containerHeight;
             delete this.scrollTopMax;
-            delete this.lastMoveEvent;
-            delete this.lastWheelEvent;
-            delete this.currentTop;
-            delete this.currentScrollTop;
-            delete this.currentY;
         }
     };
 
