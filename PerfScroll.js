@@ -190,8 +190,9 @@
         this.thumb = document.createElement('div');
         this.container = this.options.container;
         addClass(this.rail, 'PerfScroll-rail');
-        addClass(this.thumb, 'PerfScroll-rail-thumb');
+        addClass(this.thumb, 'PerfScroll-thumb');
         addClass(this.container, 'PerfScroll');
+        addClass(this.container, 'PerfScroll-overflow');
         this.container.setAttribute('data-perfscroll-id', lastInstanceId);
         this.rail.appendChild(this.thumb);
         this.container.appendChild(this.rail);

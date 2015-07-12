@@ -1,14 +1,12 @@
-.PerfScroll:hover {
-	will-change: scroll-position;
+.PerfScroll {
+	position: relative;
 }
 
-.PerfScroll:hover > .PerfScroll-rail,
-.PerfScroll:hover > .PerfScroll-rail-thumb,
-.PerfScroll > .PerfScroll-rail-thumb:active {
-	will-change: top;
+.PerfScroll-overflow {
+	overflow: hidden;
 }
 
-.PerfScroll > .PerfScroll-rail {
+.PerfScroll-rail {
 	background-color: blue;
 	height: 100%;
 	position: absolute;
@@ -17,14 +15,14 @@
 	width: 8px;
 }
 
-.PerfScroll-rail > .PerfScroll-rail-thumb {
+.PerfScroll-thumb {
 	background-color: yellow;
 	height: 30px;
 	position: absolute;
 	width: 100%;
 }
 
-.PerfScroll > .PerfScroll-rail,
-.PerfScroll-rail > .PerfScroll-rail-thumb {
+.PerfScroll-rail,
+.PerfScroll-thumb {
 	border-radius: 8px;
 }
