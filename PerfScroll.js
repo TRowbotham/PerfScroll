@@ -194,22 +194,6 @@
         this.rail.style.top = scrollTop + 'px';
     }
 
-    function onTouchMove() {
-        for (var i = 0, len = this.lastMoveEvent.changedTouches.length; i < len; i++) {
-            var diff = this.lastY - this.currentY;
-
-            this.currentScrollTop = Math.min(this.scrollTopMax, Math.max(0, this.currentScrollTop - diff));
-
-            this.thumb.style.top = Math.min(this.railHeight - this.thumbHeight, Math.max(0,
-                this.currentScrollTop / this.scrollTopMax * (this.railHeight - this.thumbHeight))) + 'px';
-            this.rail.style.top = Math.floor(this.currentScrollTop) + 'px';
-
-            scrollTo(this.container, 0, this.currentScrollTop);
-
-            this.currentY = this.lastY;
-        }
-    }
-
     function PerfScroll(aOptions) {
         if (!(this instanceof PerfScroll)) {
             return new PerfScroll(aOptions);
@@ -239,6 +223,7 @@
         this.thumbHeight = this.thumb.clientHeight;
         this.containerHeight = this.container.clientHeight;
         this.scrollTopMax = this.container.scrollHeight - this.containerHeight;
+        this.offset = 0;
 
         if (supportsPointerEvents) {
             this.event.addListener(this.container, pointerEvents.pointerdown, this, false);
@@ -285,10 +270,30 @@
             this.event.addListener(this.container, 'scroll', this, false);
         },
 
+        _handleTouchStart: function(aEvent) {
+            this.frame.stop();
+            this.reference = aEvent.changedTouches[0].clientY;
+            this.event.removeListener(this.container, 'scroll', this, false);
+            this.event.addListener(window, 'touchmove', this, false);
+            this.event.addListener(window, 'touchend', this, false);
+        },
+
+        _handleTouchMove: function() {
+            this._scrollTo(this.offset + (this.reference - this.lastY));
+            this.reference = this.lastY;
+        },
+
+        _handleTouchEnd: function() {
+            this.event.removeListener(window, 'touchmove', this, false);
+            this.event.removeListener(window, 'touchend', this, false);
+            this.event.addListener(this.container, 'scroll', this, false);
+        },
+
         _scrollTo: function(aY) {
             var offset = Math.min(this.scrollTopMax, Math.max(0, aY)),
                 thumbY = (offset / this.scrollTopMax) * (this.railHeight - this.thumbHeight);
 
+            this.offset = offset;
             this.thumb.style.top = thumbY + 'px';
             this.container.scrollTop = offset;
         },
@@ -346,28 +351,24 @@
                     break;
 
                 case 'touchstart':
-                    stopPropagation(e);
-                    preventDefault(e);
-                    this.currentTop = this.thumb.getBoundingClientRect().top;
-                    this.currentScrollTop = this.container.scrollTop;
-                    this.currentY = e.changedTouches[0].pageY;
-
-                    this.event.removeListener(this.container, 'scroll', this, false);
-                    this.event.addListener(window, 'touchmove', this, false);
-                    this.event.addListener(window, 'touchend', this, false);
+                    this._handleTouchStart(e);
 
                     break;
 
                 case 'touchmove':
+                    var self = this;
+
                     this.lastY = e.changedTouches[0].clientY;
-                    this.frame.request(bind(onTouchMove, this));
+                    this.frame.request(function() {
+                        self._handleTouchMove();
+                    });
+                    preventDefault(e);
+                    stopPropagation(e);
 
                     break;
 
                 case 'touchend':
-                    this.event.addListener(this.container, 'scroll', this, false);
-                    this.event.removeListener('touchmove', this, false);
-                    this.event.removeListener('touchend', this, false);
+                    this._handleTouchEnd();
 
                     break;
             }
