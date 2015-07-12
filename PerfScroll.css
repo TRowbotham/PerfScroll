@@ -11,6 +11,11 @@
 	max-height: inherit;
 }
 
+.PerfScroll-use-transforms > .PerfScroll-box {
+    height: auto;
+    max-height: none;
+}
+
 .PerfScroll-rail {
 	background-color: blue;
 	height: 100%;
@@ -23,7 +28,6 @@
 .PerfScroll-thumb {
 	background-color: yellow;
 	height: 30px;
-	position: absolute;
 	width: 100%;
 }
 

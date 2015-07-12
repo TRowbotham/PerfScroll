@@ -3,7 +3,8 @@
 
     var defaults = {
         container: null,
-        wheelIncrement: 120
+        wheelIncrement: 120,
+        useCSSTransforms: true
     },
 
     decay = 325,
@@ -25,6 +26,24 @@
         pointermove: (supportsMSPointerEvents ? 'mspointermove' : (supportsPointerEvents ? 'pointermove' : '')),
         pointerup:  (supportsMSPointerEvents ? 'mspointerup' : (supportsPointerEvents ? 'pointerup' : ''))
     },
+
+    transform = (function() {
+        var prefixes = ['webkit', 'Moz', 'ms', 'O'];
+
+        if ('transform' in document.documentElement.style) {
+            return 'transform';
+        }
+
+        for (var i = 0, len = prefixes.length; i < len; i++) {
+            var prop = prefixes[i] + 'Transform';
+
+            if (prop in document.documentElement.style) {
+                return prop;
+            }
+        }
+
+        return false;
+    })(),
 
     wheelEventName, requestAnimFrame, cancelAnimFrame;
 
@@ -143,6 +162,12 @@
         }
     }
 
+    function getTransform(element) {
+        var result = /(?:-)?(\d+(?:\.\d+)?)\)$/.exec(getComputedStyle(element, null)[transform]);
+
+        return result ? result[1] : 0;
+    }
+
     function preventDefault(aEvent) {
         if ('preventDefault' in aEvent) {
             aEvent.preventDefault();
@@ -180,13 +205,18 @@
         this.box = document.createElement('div');
         this.rail = document.createElement('div');
         this.thumb = document.createElement('div');
+        this.scrollContainer = this.options.useCSSTransforms && transform ? this.container : this.box;
 
         addClass(this.rail, 'PerfScroll-rail');
         addClass(this.thumb, 'PerfScroll-thumb');
         addClass(this.container, 'PerfScroll');
-        addClass(this.box, 'PerfScroll-overflow');
+        addClass(this.scrollContainer, 'PerfScroll-overflow');
         addClass(this.box, 'PerfScroll-box');
         this.container.setAttribute('data-perfscroll-id', lastInstanceId);
+
+        if (this.options.useCSSTransforms && transform) {
+            addClass(this.container, 'PerfScroll-use-transforms');
+        }
 
         while (this.container.firstChild) {
             this.box.appendChild(this.container.firstChild);
@@ -207,8 +237,11 @@
             }
         }
 
-        this.event.addListener(this.box, 'scroll', this, false);
         this.event.addListener(this.box, wheelEventName, this, false);
+
+        if (!(this.options.useCSSTransforms && transform)) {
+            this.event.addListener(this.box, 'scroll', this, false);
+        }
     }
 
     PerfScroll.getInstance = function(aInstance) {
@@ -238,12 +271,15 @@
         },
 
         _handleMouseDown: function(aEvent) {
-            var target = 'target' in aEvent ? aEvent.target : aEvent.srcElement;
+            var target = 'target' in aEvent ? aEvent.target : aEvent.srcElement,
+                thumbTop;
 
             this.frame.stop();
 
             if (target == this.thumb) {
-                this.grabDelta = aEvent.clientY - (this.thumb.getBoundingClientRect().top - this.rail.getBoundingClientRect().top);
+                thumbTop = this.options.useCSSTransforms && transform ? getTransform(this.thumb) :
+                           (this.thumb.getBoundingClientRect().top - this.rail.getBoundingClientRect().top);
+                this.grabDelta = aEvent.clientY - thumbTop;
                 this.event.addListener(document, (supportsPointerEvents ? pointerEvents.pointermove : 'mousemove'), this, false);
                 this.event.addListener(document, (supportsPointerEvents ? pointerEvents.pointerup : 'mouseup'), this, false);
             } else if (target == this.rail) {
@@ -302,9 +338,15 @@
             var offset = Math.min(this.scrollTopMax, Math.max(0, aY)),
                 thumbY = (offset / this.scrollTopMax) * (this.railHeight - this.thumbHeight);
 
+            if (this.options.useCSSTransforms && transform) {
+                this.box.style[transform] = 'translateY(' + -(offset) + 'px)';
+                this.thumb.style[transform] = 'translateY(' + thumbY + 'px)';
+            } else {
+                this.box.scrollTop = offset;
+                this.thumb.style.marginTop = thumbY + 'px';
+            }
+
             this.offset = offset;
-            this.thumb.style.top = thumbY + 'px';
-            this.box.scrollTop = offset;
         },
 
         handleEvent: function(aEvent) {
@@ -431,8 +473,8 @@
         },
 
         update: function() {
-            var scrollHeight = this.box.scrollHeight,
-                containerHeight = this.box.clientHeight;
+            var scrollHeight = this.scrollContainer.scrollHeight,
+                containerHeight = this.scrollContainer.clientHeight;
 
             this.railHeight = this.rail.clientHeight;
             this.thumbHeight = containerHeight / scrollHeight * this.railHeight;
