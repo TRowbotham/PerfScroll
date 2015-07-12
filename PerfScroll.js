@@ -250,6 +250,8 @@
                 this.grabDelta = aEvent.clientY - (this.thumb.getBoundingClientRect().top - this.rail.getBoundingClientRect().top);
                 this.event.addListener(document, (supportsPointerEvents ? pointerEvents.pointermove : 'mousemove'), this, false);
                 this.event.addListener(document, (supportsPointerEvents ? pointerEvents.pointerup : 'mouseup'), this, false);
+            } else if (target == this.rail) {
+                this.scrollTo((aEvent.clientY - this.rail.getBoundingClientRect().top) / this.railHeight * this.scrollTopMax);
             }
 
             stopPropagation(aEvent);
