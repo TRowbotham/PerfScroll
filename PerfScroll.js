@@ -244,7 +244,6 @@
 
             this.frame.stop();
             this.grabDelta = aEvent.clientY - (this.thumb.getBoundingClientRect().top - this.rail.getBoundingClientRect().top);
-            this.event.removeListener(this.container, 'scroll', this, false);
             this.event.addListener(document, 'mousemove', this, false);
             this.event.addListener(document, 'mouseup', this, false);
             stopPropagation(e);
@@ -258,7 +257,6 @@
         _handleMouseUp: function() {
             this.event.removeListener(document, 'mousemove', this, false);
             this.event.removeListener(document, 'mouseup', this, false);
-            this.event.addListener(this.container, 'scroll', this, false);
         },
 
         _handleTouchStart: function(aEvent) {
@@ -268,7 +266,6 @@
             this.velocity = 0;
             this.distance = 0;
             this.count = 0;
-            this.event.removeListener(this.container, 'scroll', this, false);
             this.event.addListener(window, 'touchmove', this, false);
             this.event.addListener(window, 'touchend', this, false);
         },
@@ -295,7 +292,6 @@
 
             this.event.removeListener(window, 'touchmove', this, false);
             this.event.removeListener(window, 'touchend', this, false);
-            this.event.addListener(this.container, 'scroll', this, false);
         },
 
         _scrollTo: function(aY) {
