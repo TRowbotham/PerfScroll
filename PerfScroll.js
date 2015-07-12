@@ -497,26 +497,51 @@
         },
 
         destroy: function() {
-            this.event.removeListener(this.container, 'scroll', this, false);
-            this.event.removeListener(this.thumb, 'mousedown', this, false);
-            this.event.removeListener(this.container, wheelEventName, this, false);
-            this.event.removeListener(this.container, 'touchstart', this, false);
-            this.event.removeListener(this.container, pointerEvents.pointerdown, this, false);
+            cancelAnimFrame(this.autoScrollRaf);
+
+            if (supportsPointerEvents) {
+                this.event.removeListener(this.container, pointerEvents.pointerdown, this, false);
+            } else {
+                this.event.removeListener(this.rail, 'mousedown', this, false);
+
+                if (supportsTouchEvents) {
+                    this.event.removeEventListener(this.container, 'touchstart', this, false);
+                }
+            }
+
+            this.event.removeListener(this.box, wheelEventName, this, false);
+
+            if (!(this.options.useCSSTransform && transform)) {
+                this.event.removeListener(this.box, 'scroll', this, false);
+            }
+
             this.container.removeAttribute('data-perfscroll-id');
             this.container.removeChild(this.rail);
+
+            while (this.box.firstChild) {
+                this.container.appendChild(this.box.firstChild);
+            }
+
+            if (instances.length == 1) {
+                this.event.removeListener(window, 'resize', handleScreenChange, false);
+                this.event.removeListener(window, 'orientationchange', handleScreenChange, false);
+            }
+
+            if (this.options.useCSSTransforms && transform) {
+                removeClass(this.container, 'PerfScroll-use-transforms');
+            }
+
             removeClass(this.container, 'PerfScroll');
+            removeClass(this.scrollContainer, 'PerfScroll-overflow');
             this.frame.destroy();
             this.event.destroy();
             delete this.frame;
+            delete this.event;
             delete instances[this.instanceId];
-            delete this.instanceId;
             delete this.contianer;
+            delete this.scrollContainer;
             delete this.rail;
             delete this.thumb;
-            delete this.railHeight;
-            delete this.thumbHeight;
-            delete this.containerHeight;
-            delete this.scrollTopMax;
         }
     };
 
