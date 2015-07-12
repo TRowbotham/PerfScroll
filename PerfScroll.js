@@ -26,17 +26,7 @@
         pointerup:  (supportsMSPointerEvents ? 'mspointerup' : (supportsPointerEvents ? 'pointerup' : ''))
     },
 
-    lastTime = 0,
-
-    currTime,
-
-    timeToCall,
-
-    wheelEventName,
-
-    requestAnimFrame,
-
-    cancelAnimFrame;
+    wheelEventName, requestAnimFrame, cancelAnimFrame;
 
     (function() {
         if ('requestAnimationFrame' in window) {
@@ -107,7 +97,6 @@
             aElement.classList.add(aClass);
         } else {
             var classStr = trim(aElement.className.replace(/[\t\r\n\f]/g, ' ')),
-                classes = classStr.split(' '),
                 finalVal;
 
             classStr = ' ' + classStr + ' ';
@@ -313,7 +302,8 @@
         },
 
         handleEvent: function(aEvent) {
-            var e = aEvent || event;
+            var e = aEvent || event,
+                self = this;
 
             switch (e.type) {
                 case pointerEvents.pointerdown:
@@ -330,8 +320,6 @@
                     break;
 
                 case pointerEvents.pointermove:
-                    var self = this;
-
                     this.lastY = e.clientY;
                     this.frame.request(function() {
                         switch (e.pointerType) {
@@ -363,14 +351,12 @@
                     break;
 
                 case wheelEventName:
-                    var self = this;
-
                     if ('deltaY' in e) {
                         this.lastY = e.deltaY > 0 ? this.options.wheelIncrement : -(this.options.wheelIncrement);
                     } else if ('wheelDelta' in e) {
                         this.lastY = e.wheelDelta > 0 ? -(this.options.wheelIncrement) : this.options.wheelIncrement;
                     } else {
-                        this.lastY = e.detail > 0 ? this.options.wheelIncrement : -(this.options.wheelIncrement)
+                        this.lastY = e.detail > 0 ? this.options.wheelIncrement : -(this.options.wheelIncrement);
                     }
 
                     this.frame.request(function() {
@@ -394,8 +380,6 @@
                     break;
 
                 case 'mousemove':
-                    var self = this;
-
                     this.lastY = e.clientY;
                     this.frame.request(function() {
                         self._handleMouseMove();
@@ -416,8 +400,6 @@
                     break;
 
                 case 'touchmove':
-                    var self = this;
-
                     this.lastY = e.changedTouches[0].clientY;
                     this.frame.request(function() {
                         self._handleTouchMove();
