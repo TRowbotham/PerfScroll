@@ -168,6 +168,12 @@
         return result ? result[1] : 0;
     }
 
+    function handleScreenChange() {
+        for (var id in instances) {
+            instances[id].update();
+        }
+    }
+
     function preventDefault(aEvent) {
         if ('preventDefault' in aEvent) {
             aEvent.preventDefault();
@@ -195,8 +201,7 @@
             return PerfScroll.getInstance(aOptions);
         }
 
-        instances[++lastInstanceId] = this;
-        this.instanceId = lastInstanceId;
+        this.instanceId = lastInstanceId++;
         this.options = options;
         this.event = new Events();
         this.frame = new Frame();
@@ -214,6 +219,11 @@
         addClass(this.box, 'PerfScroll-box');
         this.container.setAttribute('data-perfscroll-id', lastInstanceId);
 
+        if (!instances.length) {
+            this.event.addListener(window, 'resize', handleScreenChange, false);
+            this.event.addListener(window, 'orientationchange', handleScreenChange, false);
+        }
+
         if (this.options.useCSSTransforms && transform) {
             addClass(this.container, 'PerfScroll-use-transforms');
         }
@@ -225,6 +235,7 @@
         this.container.appendChild(this.box);
         this.rail.appendChild(this.thumb);
         this.container.appendChild(this.rail);
+        instances[this.instanceId] = this;
         this.update();
 
         if (supportsPointerEvents) {
