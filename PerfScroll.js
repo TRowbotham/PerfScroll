@@ -218,7 +218,7 @@
         addClass(this.container, 'PerfScroll');
         addClass(this.scrollContainer, 'PerfScroll-overflow');
         addClass(this.box, 'PerfScroll-box');
-        this.container.setAttribute('data-perfscroll-id', lastInstanceId);
+        this.container.setAttribute('data-perfscroll-id', this.instanceId);
 
         if (!instances.length) {
             this.event.addListener(window, 'resize', handleScreenChange, false);
