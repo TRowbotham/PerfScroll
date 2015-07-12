@@ -163,7 +163,7 @@
     }
 
     function getTransform(element) {
-        var result = /(?:-)?(\d+(?:\.\d+)?)\)$/.exec(getComputedStyle(element, null)[transform]);
+        var result = /(?:-)?(\d+(?:\.\d+)?)(?:px)?\)$/.exec(getComputedStyle(element, null)[transform]);
 
         return result ? result[1] : 0;
     }
