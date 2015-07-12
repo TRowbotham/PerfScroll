@@ -307,11 +307,8 @@
             var e = aEvent || event;
 
             switch (e.type) {
-                case 'wheel':
-                case 'mousewheel':
-                case 'DOMMouseScroll':
-                    stopPropagation(e);
-                    preventDefault(e);
+                case wheelEventName:
+                    var self = this;
 
                     if ('deltaY' in e) {
                         this.lastY = e.deltaY > 0 ? this.options.wheelIncrement : -(this.options.wheelIncrement);
@@ -321,7 +318,11 @@
                         this.lastY = e.detail > 0 ? this.options.wheelIncrement : -(this.options.wheelIncrement)
                     }
 
-                    this.frame.request(bind(onWheel, this));
+                    this.frame.request(function() {
+                        self._scrollTo(self.offset + self.lastY);
+                    });
+                    stopPropagation(e);
+                    preventDefault(e);
 
                     break;
 
