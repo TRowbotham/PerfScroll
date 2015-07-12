@@ -257,9 +257,9 @@
     }
 
     PerfScroll.getInstance = function(aInstance) {
-        var instance = aInstance instanceof Node ? aInstance.getAttribute('data-perfscroll-id') : aInstance;
+        var instance = aInstance instanceof Element ? aInstance.getAttribute('data-perfscroll-id') : aInstance;
 
-        return instances[instance];
+        return instances[instance] || null;
     };
 
     PerfScroll.prototype = {
