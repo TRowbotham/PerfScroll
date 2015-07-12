@@ -198,7 +198,7 @@
         var options = extend({}, defaults, aOptions || {});
 
         if (options.container.hasAttribute('data-perfscroll-id')) {
-            return PerfScroll.getInstance(aOptions);
+            return PerfScroll.getInstance(options.container);
         }
 
         this.instanceId = lastInstanceId++;
