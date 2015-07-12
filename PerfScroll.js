@@ -314,6 +314,7 @@
 
         _handleTouchStart: function(aEvent) {
             this.frame.stop();
+            cancelAnimFrame(this.autoScrollRaf);
             this.reference = supportsPointerEvents ? aEvent.clientY : aEvent.changedTouches[0].clientY;
             this.timestamp = Date.now();
             this.velocity = 0;
