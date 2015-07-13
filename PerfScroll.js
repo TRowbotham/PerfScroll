@@ -242,7 +242,7 @@
         if (supportsPointerEvents) {
             this.event.addListener(this.container, pointerEvents.pointerdown, this, false);
         } else {
-            this.event.addListener(this.thumb, 'mousedown', this, false);
+            this.event.addListener(this.rail, 'mousedown', this, false);
 
             if (supportsTouchEvents) {
                 this.event.addListener(this.container, 'touchstart', this, false);
