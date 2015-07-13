@@ -491,13 +491,22 @@
 
         update: function() {
             var scrollHeight = this.scrollContainer.scrollHeight,
-                containerHeight = this.scrollContainer.clientHeight;
+                containerHeight = this.scrollContainer.clientHeight,
+                scrollPercentage = 0;
+
+            if (this.scrollTopMax) {
+                scrollPercentage = this.offset / this.scrollTopMax;
+            }
 
             this.railHeight = this.rail.clientHeight;
             this.thumbHeight = containerHeight / scrollHeight * this.railHeight;
             this.scrollTopMax = scrollHeight - containerHeight;
 
             this.thumb.style.height = containerHeight / scrollHeight * 100 + '%';
+
+            if (scrollPercentage) {
+                this.scrollTo(scrollPercentage * this.scrollTopMax);
+            }
         },
 
         destroy: function() {
