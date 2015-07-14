@@ -37,3 +37,7 @@
 .PerfScroll-thumb {
 	border-radius: 8px;
 }
+
+.PerfScroll-inactive > .PerfScroll-rail {
+    display: none;
+}

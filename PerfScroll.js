@@ -494,6 +494,12 @@
                 containerHeight = this.scrollContainer.clientHeight,
                 scrollPercentage = 0;
 
+            if (scrollHeight > containerHeight) {
+                removeClass(this.container, 'PerfScroll-inactive');
+            } else {
+                addClass(this.container, 'PerfScroll-inactive');
+            }
+
             if (this.scrollTopMax) {
                 scrollPercentage = this.offset / this.scrollTopMax;
             }
@@ -545,6 +551,7 @@
             }
 
             removeClass(this.container, 'PerfScroll');
+            removeClass(this.container, 'PerfScroll-inactive');
             removeClass(this.scrollContainer, 'PerfScroll-overflow');
             this.frame.destroy();
             this.event.destroy();
