@@ -490,7 +490,7 @@
         },
 
         update: function() {
-            var scrollHeight = this.scrollContainer.scrollHeight,
+            var scrollHeight = this.options.useCSSTransforms && transform ? this.box.clientHeight : this.scrollContainer.scrollHeight,
                 containerHeight = this.scrollContainer.clientHeight,
                 scrollPercentage = 0;
 
