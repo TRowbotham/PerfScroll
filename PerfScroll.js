@@ -225,8 +225,8 @@
             this.event.addListener(window, 'orientationchange', handleScreenChange, false);
         }
 
-        if (this.options.useCSSTransforms && transform) {
-            addClass(this.container, 'PerfScroll-use-transforms');
+        if (!(this.options.useCSSTransforms && transform)) {
+            addClass(this.container, 'PerfScroll-use-scrolling');
         }
 
         while (this.container.firstChild) {

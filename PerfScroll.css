@@ -13,14 +13,9 @@
     user-select: none;
 }
 
-.PerfScroll-box {
+.PerfScroll-use-scrolling > .PerfScroll-box {
 	height: inherit;
 	max-height: inherit;
-}
-
-.PerfScroll-use-transforms > .PerfScroll-box {
-    height: auto;
-    max-height: none;
 }
 
 .PerfScroll-rail {
