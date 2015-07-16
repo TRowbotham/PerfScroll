@@ -14,8 +14,7 @@
 }
 
 .PerfScroll-use-scrolling > .PerfScroll-box {
-	height: inherit;
-	max-height: inherit;
+	height: 100%;
 }
 
 .PerfScroll-rail {
