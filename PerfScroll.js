@@ -210,9 +210,11 @@
         this.box = document.createElement('div');
         this.rail = document.createElement('div');
         this.thumb = document.createElement('div');
-        this.scrollContainer = this.options.useCSSTransforms && transform ?
-            (this.container == document.body ? document.documentElement : this.container): this.box;
+        this.scrollContainer = this.options.useCSSTransforms && transform ? this.container: this.box;
 
+        if (this.scrollContainer == document.body) {
+            addClass(document.documentElement, 'PerfScroll-overflow');
+        }
         addClass(this.rail, 'PerfScroll-rail');
         addClass(this.thumb, 'PerfScroll-thumb');
         addClass(this.container, 'PerfScroll');
