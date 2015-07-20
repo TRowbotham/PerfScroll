@@ -438,7 +438,10 @@
                     break;
 
                 case 'scroll':
-                    this._scrollTo(this.box.scrollTop);
+                    var self = this;
+                    requestAnimFrame(function() {
+                        self._scrollTo(self.box.scrollTop);
+                    });
                     this.event.removeListener(this.box, 'scroll', this, false);
                     stopPropagation(e);
 
@@ -495,29 +498,41 @@
         },
 
         update: function() {
-            var scrollHeight = this.options.useCSSTransforms && transform ? this.box.clientHeight : this.scrollContainer.scrollHeight,
-                containerHeight = this.scrollContainer.clientHeight,
-                scrollPercentage = 0;
+            var self = this;
 
-            if (scrollHeight > containerHeight) {
-                removeClass(this.container, 'PerfScroll-inactive');
-            } else {
-                addClass(this.container, 'PerfScroll-inactive');
+            // Older versions of IE and Opera require the height to be set explicitly as they don't correctly calculate
+            // the height: 100%; style in css.  Nor do they update their styles fast enough
+            // to catch the style change, so it has to reside outside the requestAnimationFrame call.
+            if (!(this.options.useCSSTransforms && transform)) {
+                this.scrollContainer.style.height = this.container.clientHeight + 'px';
             }
 
-            if (this.scrollTopMax) {
-                scrollPercentage = this.offset / this.scrollTopMax;
-            }
+            cancelAnimFrame(this.updateRaf);
+            this.updateRaf = requestAnimFrame(function() {
+                var scrollHeight = self.options.useCSSTransforms && transform ? self.box.clientHeight : self.scrollContainer.scrollHeight,
+                    containerHeight = self.scrollContainer.clientHeight,
+                    scrollPercentage = 0;
 
-            this.railHeight = this.rail.clientHeight;
-            this.thumbHeight = containerHeight / scrollHeight * this.railHeight;
-            this.scrollTopMax = scrollHeight - containerHeight;
+                if (scrollHeight > containerHeight) {
+                    removeClass(self.container, 'PerfScroll-inactive');
+                } else {
+                    addClass(self.container, 'PerfScroll-inactive');
+                }
 
-            this.thumb.style.height = containerHeight / scrollHeight * 100 + '%';
+                if (self.scrollTopMax) {
+                    scrollPercentage = self.offset / self.scrollTopMax;
+                }
 
-            if (scrollPercentage) {
-                this.scrollTo(scrollPercentage * this.scrollTopMax);
-            }
+                self.railHeight = self.rail.clientHeight;
+                self.thumbHeight = containerHeight / scrollHeight * self.railHeight;
+                self.scrollTopMax = scrollHeight - containerHeight;
+
+                self.thumb.style.height = containerHeight / scrollHeight * 100 + '%';
+
+                if (scrollPercentage) {
+                    self._scrollTo(scrollPercentage * self.scrollTopMax);
+                }
+            });
         },
 
         destroy: function() {
