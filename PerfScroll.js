@@ -373,7 +373,8 @@
                 self = this;
 
             switch (e.type) {
-                case pointerEvents.pointerdown:
+                case 'MSPointerDown':
+                case 'pointerdown':
                     switch (e.pointerType) {
                         case 'mouse':
                             this._handleMouseDown(e);
@@ -386,7 +387,8 @@
 
                     break;
 
-                case pointerEvents.pointermove:
+                case 'MSPointerMove':
+                case 'pointermove':
                     this.lastY = e.clientY;
                     this.frame.request(function() {
                         switch (e.pointerType) {
@@ -404,7 +406,8 @@
 
                     break;
 
-                case pointerEvents.pointerup:
+                case 'MSPointerUp':
+                case 'pointerup':
                     switch (e.pointerType) {
                         case 'mouse':
                             this._handleMouseUp();
