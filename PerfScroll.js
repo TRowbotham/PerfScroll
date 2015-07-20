@@ -22,9 +22,9 @@
     supportsClassList = 'classList' in document.documentElement,
 
     pointerEvents = {
-        pointerdown: (supportsMSPointerEvents ? 'mspointerdown' : (supportsPointerEvents ? 'pointerdown' : '')),
-        pointermove: (supportsMSPointerEvents ? 'mspointermove' : (supportsPointerEvents ? 'pointermove' : '')),
-        pointerup:  (supportsMSPointerEvents ? 'mspointerup' : (supportsPointerEvents ? 'pointerup' : ''))
+        pointerdown: (supportsMSPointerEvents ? 'MSPointerDown' : (supportsPointerEvents ? 'pointerdown' : '')),
+        pointermove: (supportsMSPointerEvents ? 'MSPointerMove' : (supportsPointerEvents ? 'pointermove' : '')),
+        pointerup:  (supportsMSPointerEvents ? 'MSPointerUp' : (supportsPointerEvents ? 'pointerup' : ''))
     },
 
     transform = (function() {
