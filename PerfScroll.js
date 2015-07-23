@@ -524,10 +524,10 @@
                 }
 
                 self.railHeight = self.rail.clientHeight;
-                self.thumbHeight = containerHeight / scrollHeight * self.railHeight;
+                self.thumbHeight = Math.round(Math.max(30, containerHeight / scrollHeight * self.railHeight));
                 self.scrollTopMax = scrollHeight - containerHeight;
 
-                self.thumb.style.height = containerHeight / scrollHeight * 100 + '%';
+                self.thumb.style.height = self.thumbHeight + 'px';
 
                 if (scrollPercentage) {
                     self._scrollTo(scrollPercentage * self.scrollTopMax);
