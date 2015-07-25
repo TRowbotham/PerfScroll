@@ -368,6 +368,32 @@
             this.offset = offset;
         },
 
+        _update: function() {
+            var scrollHeight = this.options.useCSSTransforms && transform ? this.box.clientHeight : this.scrollContainer.scrollHeight,
+                containerHeight = this.scrollContainer.clientHeight,
+                scrollPercentage = 0;
+
+            if (scrollHeight > containerHeight) {
+                removeClass(this.container, 'PerfScroll-inactive');
+            } else {
+                addClass(this.container, 'PerfScroll-inactive');
+            }
+
+            if (this.scrollTopMax) {
+                scrollPercentage = this.offset / this.scrollTopMax;
+            }
+
+            this.railHeight = this.rail.clientHeight;
+            this.thumbHeight = Math.round(Math.max(30, containerHeight / scrollHeight * this.railHeight));
+            this.scrollTopMax = scrollHeight - containerHeight;
+
+            this.thumb.style.height = this.thumbHeight + 'px';
+
+            if (scrollPercentage) {
+                this.scrollTo(scrollPercentage * this.scrollTopMax);
+            }
+        },
+
         handleEvent: function(aEvent) {
             var e = aEvent || event,
                 self = this;
@@ -501,38 +527,20 @@
             var self = this;
 
             // Older versions of IE and Opera require the height to be set explicitly as they don't correctly calculate
-            // the height: 100%; style in css.  Nor do they update their styles fast enough
-            // to catch the style change, so it has to reside outside the requestAnimationFrame call.
-            if (!(this.options.useCSSTransforms && transform)) {
+            // the scrollContainer's height based on the stylesheet delcaration of height: 100%;.
+            if (!(this.options.useCSSTransforms && transform) && 'attachEvent' in window) {
+                clearTimeout(this.updateTimeout);
                 this.scrollContainer.style.height = this.container.clientHeight + 'px';
+
+                // Force a reflow in older versions of IE and Opera by waiting :sadface:.
+                this.updateTimeout = setTimeout(function() {
+                    self._update();
+                }, 0);
+
+                return;
             }
 
-            cancelAnimFrame(this.updateRaf);
-            this.updateRaf = requestAnimFrame(function() {
-                var scrollHeight = self.options.useCSSTransforms && transform ? self.box.clientHeight : self.scrollContainer.scrollHeight,
-                    containerHeight = self.scrollContainer.clientHeight,
-                    scrollPercentage = 0;
-
-                if (scrollHeight > containerHeight) {
-                    removeClass(self.container, 'PerfScroll-inactive');
-                } else {
-                    addClass(self.container, 'PerfScroll-inactive');
-                }
-
-                if (self.scrollTopMax) {
-                    scrollPercentage = self.offset / self.scrollTopMax;
-                }
-
-                self.railHeight = self.rail.clientHeight;
-                self.thumbHeight = Math.round(Math.max(30, containerHeight / scrollHeight * self.railHeight));
-                self.scrollTopMax = scrollHeight - containerHeight;
-
-                self.thumb.style.height = self.thumbHeight + 'px';
-
-                if (scrollPercentage) {
-                    self._scrollTo(scrollPercentage * self.scrollTopMax);
-                }
-            });
+            this._update();
         },
 
         destroy: function() {
